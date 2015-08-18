@@ -1,0 +1,7 @@
+/vendor
+.env
+*.sqlite
+*.md.def
+.idea
+.phpstorm.meta
+_ide_helper
