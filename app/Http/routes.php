@@ -11,6 +11,6 @@
 |
 */
 
-$app->get('/', function() use ($app) {
-    return $app->welcome();
-});
+$app->get('/', ['as' => 'main', 'uses' => 'Controller@index']);
+$app->post('/new', ['as' => 'createLetter', 'uses' => 'Controller@create']);
+$app->get('/{url}', ['as' => 'getLetter', 'uses' => 'Controller@get']);
