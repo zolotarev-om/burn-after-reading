@@ -1,15 +1,25 @@
 <?php
 
-namespace app\Repositories;
+namespace App\Repositories;
 
 class Repository
 {
+    /**
+     * @param $url
+     *
+     * @return array
+     */
     public function verifyUniqueUrl($url)
     {
         return app('db')->select('SELECT * FROM link WHERE link.url = ?', [$url]);
     }
 
-    public function createCryptedLetterAndReturnId($cryptedText)
+    /**
+     * @param $cryptedText
+     *
+     * @return int
+     */
+    public function saveCryptedLetterAndReturnId($cryptedText)
     {
         app('db')->insert(
             'INSERT INTO letter (text,created_at,updated_at) VALUES (?,?,?)',
@@ -20,7 +30,12 @@ class Repository
         return get_object_vars($resLetId[0])['last_insert_rowid()'];
     }
 
-    public function createLinks($urlAdmin, $urlUser, $letterId)
+    /**
+     * @param $urlAdmin
+     * @param $urlUser
+     * @param $letterId
+     */
+    public function saveLinks($urlAdmin, $urlUser, $letterId)
     {
         try {
             app('db')->insert(
@@ -36,6 +51,11 @@ class Repository
         }
     }
 
+    /**
+     * @param $url
+     *
+     * @return object
+     */
     public function getLetter($url)
     {
         $res = app('db')->select(
