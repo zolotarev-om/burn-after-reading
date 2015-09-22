@@ -64,4 +64,13 @@ class Repository
         );
         return $res[0];
     }
+
+    public function burnUrl($url)
+    {
+        try {
+            app('db')->update("UPDATE link SET visited=?,updated_at=? WHERE url=?", [true, time(), $url]);
+        } catch (\Exception $e) {
+            dd($e);
+        }
+    }
 }
