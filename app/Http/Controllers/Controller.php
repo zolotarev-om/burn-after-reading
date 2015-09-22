@@ -38,9 +38,20 @@ class Controller extends BaseController
      */
     public function get($url)
     {
-        $encryptedText = $this->repo->getLetter($url)->text;
+        $letter = $this->repo->getLetter($url);
+        $encryptedText = $letter->text;
         $decryptedText = $this->decrypt($encryptedText);
-        return view('index')->with('text', $decryptedText);
+
+        if ($letter->visited == true) {
+            return view('index')->with('text', 'This page already visited. And now this is unavailable');
+        }
+        if ($letter->admin == true) {
+            return view('index')->with('text', $decryptedText)->with('admin', true);
+        }
+        if ($letter->visited == false && $letter->admin == false) {
+            $this->repo->burnUrl($letter->url);
+            return view('index')->with('text', $decryptedText);
+        }
     }
 
     /**
