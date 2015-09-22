@@ -1,0 +1,16 @@
+Options All -Indexes
+
+<FilesMatch ".(htaccess|env|ini|phps|fla|log|sh|sqlite)$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+<FilesMatch ".(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf)$">
+    Header set Cache-Control "max-age=2592000"
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
