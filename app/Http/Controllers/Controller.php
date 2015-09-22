@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use app\Repositories\Repository;
+use App\Repositories\Repository;
 use Faker\Factory;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
@@ -33,10 +33,14 @@ class Controller extends BaseController
 
     /**
      * @param $url
+     *
+     * @return \Illuminate\View\View
      */
     public function get($url)
     {
-        $this->repo->getLetter($url);
+        $encryptedText = $this->repo->getLetter($url)->text;
+        $decryptedText = $this->decrypt($encryptedText);
+        return view('index')->with('text', $decryptedText);
     }
 
     /**
@@ -44,12 +48,35 @@ class Controller extends BaseController
      */
     public function create()
     {
-        $inputText = 'i am a private letter';
-        $cryptedText = app('encrypter')->encrypt($inputText);
+        $validator = app('validator')->make(app('request')->all(), [
+            'letter' => 'required|min:2|max:12555',
+        ]);
 
-        $letterId = $this->repo->createCryptedLetterAndReturnId($cryptedText);
-        $urls = $this->generateUniqueUrl();
-        $this->repo->createLinks($urls['admin'], $urls['user'], $letterId);
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return view('index')->with('errors', $errors);
+        } else {
+            $inputText = app('request')->input('letter');
+            $encryptedText = $this->encrypt($inputText);
+
+            $letterId = $this->repo->saveCryptedLetterAndReturnId($encryptedText);
+            $urls = $this->generateUniqueUrl();
+            $this->repo->saveLinks($urls['admin'], $urls['user'], $letterId);
+
+            return view('index')->with('url', $urls);
+        }
+    }
+
+    /**
+     * @param $letter
+     *
+     * @return string
+     */
+    private function encrypt($letter)
+    {
+        $letter = htmlspecialchars(strip_tags($letter, '<b><i><sup><sub><em><strong><u><br>'));
+        $encryptedText = app('encrypter')->encrypt($letter);
+        return $encryptedText;
     }
 
     /**
@@ -68,5 +95,17 @@ class Controller extends BaseController
         } while ($isUniqLinkUser);
 
         return ['admin' => $urlAdmin, 'user' => $urlUser];
+    }
+
+    /**
+     * @param $encryptedText
+     *
+     * @return string
+     */
+    private function decrypt($encryptedText)
+    {
+        $decryptedText = app('encrypter')->decrypt($encryptedText);
+        $decryptedText = htmlspecialchars_decode($decryptedText);
+        return $decryptedText;
     }
 }
