@@ -46,7 +46,7 @@ class Controller extends BaseController
             return view('index')->with('text', 'This page already visited. And now this is unavailable');
         }
         if ($letter->admin == true) {
-            return view('index')->with('text', $decryptedText)->with('admin', true);
+            return view('index')->with('text', $decryptedText)->with('admin', true)->with('id', $letter->id);
         }
         if ($letter->visited == false && $letter->admin == false) {
             $this->repo->burnUrl($letter->url);
@@ -79,6 +79,19 @@ class Controller extends BaseController
     }
 
     /**
+     * @return $this
+     */
+    public function createNewUserUrl()
+    {
+        $request = app('request');
+        if ($request->ajax()) {
+            $newUrl = $this->generateUniqueUrl(true);
+            $this->repo->saveLinks(null, $newUrl['user'], $request->id);
+            return view('form-user')->with('url', $newUrl)->render();
+        }
+    }
+
+    /**
      * @param $letter
      *
      * @return string
@@ -91,21 +104,29 @@ class Controller extends BaseController
     }
 
     /**
+     * @param bool $onlyUser
+     *
      * @return array
      */
-    private function generateUniqueUrl()
+    private function generateUniqueUrl($onlyUser = false)
     {
-        do {
-            $urlAdmin = Factory::create()->lexify('????????????????????????????????????????');
-            $isUniqLinkAdm = $this->repo->verifyUniqueUrl($urlAdmin);
-        } while ($isUniqLinkAdm);
+        $res = [];
+
+        if (!$onlyUser) {
+            do {
+                $urlAdmin = Factory::create()->lexify('????????????????????????????????????????');
+                $isUniqLinkAdm = $this->repo->verifyUniqueUrl($urlAdmin);
+            } while ($isUniqLinkAdm);
+            $res['admin'] = $urlAdmin;
+        }
 
         do {
             $urlUser = Factory::create()->lexify('????????????????????');
             $isUniqLinkUser = $this->repo->verifyUniqueUrl($urlUser);
         } while ($isUniqLinkUser);
+        $res['user'] = $urlUser;
 
-        return ['admin' => $urlAdmin, 'user' => $urlUser];
+        return $res;
     }
 
     /**

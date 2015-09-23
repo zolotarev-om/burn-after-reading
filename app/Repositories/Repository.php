@@ -38,10 +38,12 @@ class Repository
     public function saveLinks($urlAdmin, $urlUser, $letterId)
     {
         try {
-            app('db')->insert(
-                'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES(?,?,?,?,?,?)',
-                [$urlAdmin, $letterId, true, false, time(), time()]
-            );
+            if ($urlAdmin != null) {
+                app('db')->insert(
+                    'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES(?,?,?,?,?,?)',
+                    [$urlAdmin, $letterId, true, false, time(), time()]
+                );
+            }
             app('db')->insert(
                 'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES (?,?,?,?,?,?)',
                 [$urlUser, $letterId, false, false, time(), time()]

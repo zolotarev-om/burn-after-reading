@@ -13,4 +13,5 @@
 
 $app->get('/', ['as' => 'main', 'uses' => 'Controller@index']);
 $app->post('/new', ['as' => 'createLetter', 'uses' => 'Controller@create']);
+$app->post('/new/url', ['as' => 'createLetter', 'uses' => 'Controller@createNewUserUrl']);
 $app->get('/{url}', ['as' => 'getLetter', 'uses' => 'Controller@get']);
