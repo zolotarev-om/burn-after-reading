@@ -1,3 +1,3 @@
-Административная ссылка: <?php include 'form-admin.php'; ?>
+Administrative link: <?php include 'form-admin.php'; ?>
 <br>
-Ссылка для просмотра: <?php include 'form-user.php'; ?>
+Link for a single view: <?php include 'form-user.php'; ?>
