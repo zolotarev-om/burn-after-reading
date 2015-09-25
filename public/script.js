@@ -1,6 +1,6 @@
 $(document).ready(function ()
 {
-    var id = $(":hidden[name=id]").val();
+    var url = window.location.pathname.slice(1);
 
     $('#submit').click(function ()
     {
@@ -10,10 +10,11 @@ $(document).ready(function ()
             async: true,
             url: '/new/url',
             type: 'post',
-            data: {'id': id},
+            data: {'url': url},
             success: function (data)
             {
-                $('.row').append('Ваша новая ссылка: ').append(data);
+                console.log(data);
+                $('#result').append('The new one-time link: ').append(data);
             }
         });
     });
