@@ -38,16 +38,18 @@ class Repository
     public function saveLinks($urlAdmin, $urlUser, $letterId)
     {
         try {
-            app('db')->insert(
-                'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES(?,?,?,?,?,?)',
-                [$urlAdmin, $letterId, true, false, time(), time()]
-            );
+            if ($urlAdmin != null) {
+                app('db')->insert(
+                    'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES(?,?,?,?,?,?)',
+                    [$urlAdmin, $letterId, true, false, time(), time()]
+                );
+            }
             app('db')->insert(
                 'INSERT INTO link (url,letter_id,admin,visited,created_at,updated_at) VALUES (?,?,?,?,?,?)',
                 [$urlUser, $letterId, false, false, time(), time()]
             );
         } catch (\Exception $e) {
-            echo $e;
+            dd($e);
         }
     }
 
@@ -65,6 +67,9 @@ class Repository
         return $res[0];
     }
 
+    /**
+     * @param $url
+     */
     public function burnUrl($url)
     {
         try {
@@ -72,5 +77,28 @@ class Repository
         } catch (\Exception $e) {
             dd($e);
         }
+    }
+
+    /**
+     * @param $url
+     *
+     * @return string
+     */
+    public function getLetterIdWhereUrl($url)
+    {
+        return app('cache')->remember($url, 60, function () use ($url) {
+            $link = app('db')->select('SELECT letter_id FROM link WHERE link.url = ?', [$url]);
+            return $link[0]->letter_id;
+        });
+    }
+
+    /**
+     * @param $letterId
+     *
+     * @return array
+     */
+    public function getAllLinksWhereLetterId($letterId)
+    {
+        return app('db')->select('SELECT * FROM link WHERE link.letter_id = ? AND link.admin = ?', [$letterId, false]);
     }
 }

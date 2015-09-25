@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\Repository;
+use DateTime;
+use DateTimeZone;
 use Faker\Factory;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
@@ -46,16 +48,18 @@ class Controller extends BaseController
             return view('index')->with('text', 'This page already visited. And now this is unavailable');
         }
         if ($letter->admin == true) {
-            return view('index')->with('text', $decryptedText)->with('admin', true);
+            $urls = $this->getExistingUrl($letter->id);
+            return view('index')->with('text', $decryptedText)->with('admin', true)->with('urls', $urls);
         }
         if ($letter->visited == false && $letter->admin == false) {
             $this->repo->burnUrl($letter->url);
             return view('index')->with('text', $decryptedText);
         }
+        return null;
     }
 
     /**
-     * from post request
+     * @return $this
      */
     public function create()
     {
@@ -79,6 +83,21 @@ class Controller extends BaseController
     }
 
     /**
+     * @return $this
+     */
+    public function createNewUserUrl()
+    {
+        $request = app('request');
+        if ($request->ajax()) {
+            $letterId = $this->repo->getLetterIdWhereUrl($request->url);
+            $newUrl = $this->generateUniqueUrl(true);
+            $this->repo->saveLinks(null, $newUrl['user'], $letterId);
+            return view('form-user')->with('url', $newUrl)->render();
+        }
+        return null;
+    }
+
+    /**
      * @param $letter
      *
      * @return string
@@ -91,21 +110,29 @@ class Controller extends BaseController
     }
 
     /**
+     * @param bool $onlyUser
+     *
      * @return array
      */
-    private function generateUniqueUrl()
+    private function generateUniqueUrl($onlyUser = false)
     {
-        do {
-            $urlAdmin = Factory::create()->lexify('????????????????????????????????????????');
-            $isUniqLinkAdm = $this->repo->verifyUniqueUrl($urlAdmin);
-        } while ($isUniqLinkAdm);
+        $res = [];
+
+        if (!$onlyUser) {
+            do {
+                $urlAdmin = Factory::create()->lexify('????????????????????????????????????????');
+                $isUniqLinkAdm = $this->repo->verifyUniqueUrl($urlAdmin);
+            } while ($isUniqLinkAdm);
+            $res['admin'] = $urlAdmin;
+        }
 
         do {
             $urlUser = Factory::create()->lexify('????????????????????');
             $isUniqLinkUser = $this->repo->verifyUniqueUrl($urlUser);
         } while ($isUniqLinkUser);
+        $res['user'] = $urlUser;
 
-        return ['admin' => $urlAdmin, 'user' => $urlUser];
+        return $res;
     }
 
     /**
@@ -118,5 +145,28 @@ class Controller extends BaseController
         $decryptedText = app('encrypter')->decrypt($encryptedText);
         $decryptedText = htmlspecialchars_decode($decryptedText);
         return $decryptedText;
+    }
+
+    /**
+     * @param $letterId
+     *
+     * @return array
+     */
+    private function getExistingUrl($letterId)
+    {
+        $letters = $this->repo->getAllLinksWhereLetterId($letterId);
+        $res = [];
+        foreach ($letters as $val) {
+            if ($val->visited) {
+                $updated = new DateTime('now', new DateTimeZone('Europe/Moscow'));
+                $updated = $updated->setTimestamp($val->updated_at);
+                $updated = $updated->format('H:i d.m.Y');
+            } else {
+                $updated = 0;
+            }
+
+            $res[] = ['url' => $val->url, 'visited' => $val->visited, 'at' => $updated];
+        }
+        return $res;
     }
 }

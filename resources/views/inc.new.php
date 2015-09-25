@@ -1,7 +1,3 @@
-Административная ссылка:
-<input size="70" onClick="this.select();" value="http://<?=filter_input(INPUT_SERVER, 'SERVER_NAME');
-?>/<?=$url['admin']?>" />
+Administrative link: <?php include 'form-admin.php'; ?>
 <br>
-Ссылка для просмотра:
-<input size="40" onClick="this.select();" value="http://<?=filter_input(INPUT_SERVER, 'SERVER_NAME');
-?>/<?=$url['user']?>" />
+Link for a single view: <?php include 'form-user.php'; ?>

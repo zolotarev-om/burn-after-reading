@@ -6,5 +6,5 @@
         <textarea name="letter" class="form-control" placeholder="Enter secret letter" cols="30" rows="10"></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">Отправить</button>
+    <button type="submit" class="btn btn-primary">Create</button>
 </form>
