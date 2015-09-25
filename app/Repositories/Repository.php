@@ -79,5 +79,26 @@ class Repository
         }
     }
 
+    /**
+     * @param $url
+     *
+     * @return string
+     */
+    public function getLetterIdWhereUrl($url)
+    {
+        return app('cache')->remember($url, 60, function () use ($url) {
+            $link = app('db')->select('SELECT letter_id FROM link WHERE link.url = ?', [$url]);
+            return $link[0]->letter_id;
+        });
+    }
 
+    /**
+     * @param $letterId
+     *
+     * @return array
+     */
+    public function getAllLinksWhereLetterId($letterId)
+    {
+        return app('db')->select('SELECT * FROM link WHERE link.letter_id = ? AND link.admin = ?', [$letterId, false]);
+    }
 }
