@@ -49,7 +49,7 @@ class Repository
                 [$urlUser, $letterId, false, false, time(), time()]
             );
         } catch (\Exception $e) {
-            echo $e;
+            dd($e);
         }
     }
 
@@ -67,6 +67,9 @@ class Repository
         return $res[0];
     }
 
+    /**
+     * @param $url
+     */
     public function burnUrl($url)
     {
         try {
@@ -75,4 +78,6 @@ class Repository
             dd($e);
         }
     }
+
+
 }
